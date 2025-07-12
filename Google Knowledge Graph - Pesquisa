@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulta</title>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    input, button { padding: 10px; margin-right: 10px; }
+    #result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Google Knowledge Graph - Pesquisa</h1>
+  <input type="text" id="query" placeholder="Digite um termo (ex: Brasil)" />
+  <button onclick="searchKG()">Buscar</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function searchKG() {
+      const apiKey = "";  // Chave de API
+      const query = document.getElementById("query").value;
+      const url = `https://kgsearch.googleapis.com/v1/entities:search?query=${encodeURIComponent(query)}&limit=1&indent=true&key=${apiKey}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      if (data.itemListElement.length > 0) {
+        const entity = data.itemListElement[0].result;
+        const name = entity.name || "Sem nome";
+        const description = entity.description || "Sem descrição";
+        const detailedDesc = entity.detailedDescription?.articleBody || "Sem descrição detalhada";
+        const link = entity.detailedDescription?.url || "#";
+
+        resultDiv.innerHTML = `
+          <h2>${name}</h2>
+          <p><strong>Descrição:</strong> ${description}</p>
+          <p>${detailedDesc}</p>
+          <a href="${link}" target="_blank">Veja mais</a>
+        `;
+      } else {
+        resultDiv.innerHTML = "<p>Não encontrado.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
+
