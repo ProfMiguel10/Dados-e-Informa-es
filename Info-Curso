@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulta - Curso</title>
+  <style>
+    body { font-family: Arial; margin: 40px; max-width: 800px; }
+    button { margin-top: 20px; padding: 10px; }
+    #resultado { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <p>Escolha um curso:</p>
+  <select id="cursoSelect">
+    <option value="Inteligência artificial">Inteligência Artificial</option>
+    <option value="Ciência de dados">Ciência de Dados</option>
+    <option value="Segurança da informação">Segurança da Informação</option>
+    <option value="Engenharia de software">Engenharia de Software</option>
+    <option value="Banco de dados">Banco de Dados</option>
+  </select>
+  <button onclick="buscarInformacao()">Buscar na Wikipedia</button>
+  <div id="resultado"></div>
+  <script>
+    async function buscarInformacao() {
+      const curso = document.getElementById("cursoSelect").value;
+      const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(curso)}`;
+
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.innerHTML = "<p>Buscando informações...</p>";
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.extract) {
+          resultadoDiv.innerHTML = `
+            <h3>${data.title}</h3>
+            <p>${data.extract}</p>
+            <a href="${data.content_urls.desktop.page}" target="_blank">Leia mais na Wikipedia</a>
+          `;
+        } else {
+          resultadoDiv.innerHTML = "<p>Não foi possível encontrar informações para este curso.</p>";
+        }
+      } catch (error) {
+        resultadoDiv.innerHTML = "<p>Erro ao consultar a API externa.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
