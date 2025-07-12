@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Qual curso é ideal para você?</title>
+  <style>
+    body { font-family: Arial; margin: 40px; max-width: 700px; }
+    label { display: block; margin-top: 10px; }
+    button { margin-top: 20px; padding: 10px; }
+    #resultado { margin-top: 30px; font-weight: bold; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <p>Marque os itens com os quais você mais se identifica:</p>
+  <form id="form">
+    <label><input type="checkbox" id="gostaProgramar"> Programar</label>
+    <label><input type="checkbox" id="IA"> Inteligência Artificial</label>
+    <label><input type="checkbox" id="gostaDados"> Gosto de trabalhar com dados</label>
+    <label><input type="checkbox" id="criativo"> Sou criativo e gosto de desenvolver soluções</label>
+    <label><input type="checkbox" id="seguranca"> Segurança digital</label>
+    <label><input type="checkbox" id="redes"> Gosto de redes e infraestrutura</label>
+    <label><input type="checkbox" id="empreendedor"> Perfil empreendedor ou de gestão</label>
+  </form>
+  <button onclick="diagnosticar()">Ver meu curso ideal</button>
+  <div id="resultado"></div>
+  <script>
+    function diagnosticar() {
+      const programar = document.getElementById("gostaProgramar").checked;
+      const ia = document.getElementById("IA").checked;
+      const dados = document.getElementById("gostaDados").checked;
+      const criativo = document.getElementById("criativo").checked;
+      const seguranca = document.getElementById("seguranca").checked;
+      const redes = document.getElementById("redes").checked;
+      const empreendedor = document.getElementById("empreendedor").checked;
+      let resultado = "Tente selecionar mais opções.";
+      if (ia && programar && dados) {
+        resultado = "Inteligência Artificial";
+      } else if (dados && empreendedor) {
+        resultado = "Ciência de Dados ou Banco de Dados";
+      } else if (programar && criativo) {
+        resultado = "Sistemas para Internet ou Engenharia de Software";
+      } else if (seguranca && redes) {
+        resultado = "Segurança da Informação ou Redes de Computadores";
+      } else if (empreendedor && !programar) {
+        resultado = "Gestão da Tecnologia da Informação";
+      } else if (redes && !programar) {
+        resultado = "Redes de Computadores";
+      }
+      document.getElementById("resultado").innerText = resultado;
+    }
+  </script>
+</body>
+</html>
