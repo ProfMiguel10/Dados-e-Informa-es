@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assistente de Voz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    button {
+      font-size: 18px;
+      padding: 15px 30px;
+      cursor: pointer;
+    }
+    #transcricao {
+      margin-top: 30px;
+      font-size: 24px;
+      min-height: 50px;
+      border: 2px solid #333;
+      padding: 15px;
+      border-radius: 8px;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Assistente de Voz </h1>
+  <button id="start-btn">Fale Agora</button>
+  <div id="transcricao">Texto Reconhecido</div>
+  <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta a API de reconhecimento de voz.");
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "pt-BR";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      const startBtn = document.getElementById("start-btn");
+      const transcricaoDiv = document.getElementById("transcricao");
+      startBtn.addEventListener("click", () => {
+        transcricaoDiv.textContent = "Ouvindo...";
+        recognition.start();
+      });
+      recognition.addEventListener("result", (event) => {
+        const texto = event.results[0][0].transcript;
+        transcricaoDiv.textContent = `Você disse: "${texto}"`;
+        const synth = window.speechSynthesis;
+        const resposta = new SpeechSynthesisUtterance(`Você disse: ${texto}`);
+        resposta.lang = "pt-BR";
+        synth.speak(resposta);
+      });
+      recognition.addEventListener("speechend", () => {
+        recognition.stop();
+      });
+      recognition.addEventListener("error", (event) => {
+        transcricaoDiv.textContent = `Erro: ${event.error}`;
+      });
+    }
+  </script>
+</body>
+</html>
+
