@@ -41,12 +41,6 @@
       lat: 43.65107, lon: -79.347015,
       tecnologia: "Blockchain",
       link: "https://www.blockchainresearchinstitute.org"
-    },
-    {
-      nome: "Centro de IA - USP (São Paulo, Brasil)",
-      lat: -23.5617, lon: -46.7309,
-      tecnologia: "IA Aplicada e Ética",
-      link: "https://centrodeia.org.br"
     }
   ];
 locais.forEach(loc => {
