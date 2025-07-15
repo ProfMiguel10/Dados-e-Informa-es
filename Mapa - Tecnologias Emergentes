@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa - Tecnologias Emergentes</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([20, 0], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  const locais = [
+    {
+      nome: "OpenAI (São Francisco, EUA)",
+      lat: 37.7749, lon: -122.4194,
+      tecnologia: "Inteligência Artificial",
+      link: "https://openai.com"
+    },
+    {
+      nome: "Instituto Fraunhofer (Alemanha)",
+      lat: 50.1109, lon: 8.6821,
+      tecnologia: "Computação Quântica e Indústria 4.0",
+      link: "https://www.fraunhofer.de"
+    },
+    {
+      nome: "Centro de Inovação Huawei (Shenzhen, China)",
+      lat: 22.5431, lon: 114.0579,
+      tecnologia: "5G e IoT",
+      link: "https://www.huawei.com"
+    },
+    {
+      nome: "Blockchain Research Institute (Toronto, Canadá)",
+      lat: 43.65107, lon: -79.347015,
+      tecnologia: "Blockchain",
+      link: "https://www.blockchainresearchinstitute.org"
+    },
+    {
+      nome: "Centro de IA - USP (São Paulo, Brasil)",
+      lat: -23.5617, lon: -46.7309,
+      tecnologia: "IA Aplicada e Ética",
+      link: "https://centrodeia.org.br"
+    }
+  ];
+locais.forEach(loc => {
+    L.marker([loc.lat, loc.lon])
+      .addTo(map)
+      .bindPopup(`<b>${loc.nome}</b><br>${loc.tecnologia}<br><a href="${loc.link}" target="_blank">Saiba mais</a>`);
+  });
+</script>
+</body>
+</html>
