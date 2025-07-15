@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Cadastro e Consentimento LGPD</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 40px; color: #333; }
+  form, .output { background: #fff; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  label { display: block; margin-top: 15px; font-weight: 600; }
+  input[type=text], input[type=email] { width: 100%; padding: 10px; margin-top: 6px; border-radius: 5px; border: 1px solid #ccc; }
+  .checkbox-container { font-size: 13px; margin-top: 15px; }
+  input[type=checkbox] { transform: scale(1.1); margin-right: 6px; vertical-align: middle; }
+  button { width: 100%; padding: 12px; margin-top: 20px; background: #008080; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #005f5f; }
+  .output { margin-top: 30px; text-align: center; color: #0a9396; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;">Cadastro Evento Geek</h2>
+<form id="formulario">
+  <label for="nome">Nome completo:</label>
+  <input type="text" id="nome" required placeholder="Seu nome" />
+  <label for="email">E-mail:</label>
+  <input type="email" id="email" required placeholder="Seu e-mail" />
+
+  <div class="checkbox-container">
+    <label>
+      <input type="checkbox" id="consentimento" required />
+      Autorizo o uso dos meus dados conforme a LGPD para comunicação do evento.
+    </label>
+  </div>
+  <button type="submit">Enviar</button>
+</form>
+<div class="output" id="saida" style="display:none;">
+  <h3>Cadastro realizado!</h3>
+  <p id="dados"></p>
+  <p>Obrigado por confiar no Evento Geek!</p>
+</div>
+<script>
+  document.getElementById('formulario').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!document.getElementById('consentimento').checked) {
+      alert('Você precisa autorizar o uso dos dados.');
+      return;
+    }
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    document.getElementById('dados').innerHTML = `<strong>Nome:</strong> ${nome}<br><strong>E-mail:</strong> ${email}<br><strong>Consentimento:</strong> Confirmado`;
+    this.style.display = 'none';
+    document.getElementById('saida').style.display = 'block';
+  });
+</script>
+</body>
+</html>
