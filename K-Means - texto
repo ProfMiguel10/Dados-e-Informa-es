@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Agrupamento de Textos - K-Means</title>
+<style>
+  body { font-family: Arial; padding: 20px }
+  textarea { width: 100%; height: 60px; margin: 5px 0; }
+  button { margin-top: 10px; padding: 8px 12px }
+  .cluster { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-left: 8px solid; }
+</style>
+</head>
+<body>
+<h2>Agrupador de Textos (K-Means)</h2>
+<textarea id="entradaTexto" placeholder="Digite um texto para agrupar..."></textarea>
+<button onclick="adicionarTexto()">Adicionar texto</button>
+<button onclick="executarKMeans()">Executar agrupamento</button>
+<label>Qtd clusters:
+  <select id="entradaK">
+    <option>2</option><option>3</option><option>4</option>
+  </select>
+</label>
+<div id="listaTextos"><b>Textos inseridos:</b><br/></div>
+<div id="resultados"></div>
+
+<script>
+let textos = [];
+
+function adicionarTexto() {
+  const texto = entradaTexto.value.trim();
+  if (!texto) return alert('Digite um texto válido!');
+  textos.push(texto);
+  entradaTexto.value = '';
+  atualizarListaTextos();
+}
+
+function atualizarListaTextos() {
+  listaTextos.innerHTML = '<b>Textos inseridos:</b><br/>' + textos.map((t, i) => `<b>#${i + 1}</b>: ${t}`).join('<br/><br/>');
+}
+
+// Pré-processamento simples (bag of words)
+function vetorizarTextos(textos) {
+  const vocab = new Set();
+  const palavrasPorTexto = textos.map(t => t.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/));
+  palavrasPorTexto.forEach(palavras => palavras.forEach(p => vocab.add(p)));
+  const vocabArray = Array.from(vocab);
+
+  return palavrasPorTexto.map(palavras => {
+    return vocabArray.map(p => palavras.filter(x => x === p).length);
+  });
+}
+
+// Distância Euclidiana
+function distancia(a, b) {
+  return Math.sqrt(a.reduce((soma, val, i) => soma + (val - b[i]) ** 2, 0));
+}
+
+// Algoritmo K-Means
+function kMeans(vetores, k, maxIter = 100) {
+  let centroides = [];
+  const usados = new Set();
+  while (centroides.length < k) {
+    const idx = Math.floor(Math.random() * vetores.length);
+    if (!usados.has(idx)) {
+      centroides.push([...vetores[idx]]);
+      usados.add(idx);
+    }
+  }
+
+  let grupos = new Array(vetores.length).fill(-1);
+  for (let iter = 0; iter < maxIter; iter++) {
+    let mudancas = 0;
+
+    for (let i = 0; i < vetores.length; i++) {
+      let minDist = Infinity, melhor = -1;
+      for (let c = 0; c < k; c++) {
+        let d = distancia(vetores[i], centroides[c]);
+        if (d < minDist) { minDist = d; melhor = c; }
+      }
+      if (grupos[i] !== melhor) {
+        grupos[i] = melhor;
+        mudancas++;
+      }
+    }
+
+    if (mudancas === 0) break;
+
+    let soma = Array(k).fill(0).map(() => Array(vetores[0].length).fill(0));
+    let contagem = Array(k).fill(0);
+
+    for (let i = 0; i < vetores.length; i++) {
+      const c = grupos[i];
+      contagem[c]++;
+      for (let j = 0; j < vetores[i].length; j++) {
+        soma[c][j] += vetores[i][j];
+      }
+    }
+
+    for (let c = 0; c < k; c++) {
+      if (contagem[c]) {
+        centroides[c] = soma[c].map(s => s / contagem[c]);
+      }
+    }
+  }
+
+  return grupos;
+}
+
+function executarKMeans() {
+  if (textos.length < 2) return alert('Insira ao menos dois textos!');
+  const k = parseInt(entradaK.value);
+  if (k < 1 || k > textos.length) return alert('Quantidade de clusters inválida!');
+  const vetores = vetorizarTextos(textos);
+  const grupos = kMeans(vetores, k);
+  exibirResultados(grupos);
+}
+
+function exibirResultados(grupos) {
+  const cores = ['#f44336', '#4caf50', '#2196f3', '#ff9800'];
+  let html = '';
+  grupos.forEach((g, i) => {
+    html += `<div class="cluster" style="border-left-color:${cores[g % cores.length]}">
+      <b>Cluster ${g + 1}</b>: ${textos[i]}
+    </div>`;
+  });
+  resultados.innerHTML = html;
+}
+</script>
+</body>
+</html>
