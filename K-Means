@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>K-Means</title>
+<style>
+  body{font-family:Arial;padding:20px}
+  input[type=number]{width:80px;margin-right:10px}
+  button{margin-top:10px;padding:8px 12px}
+  #listaPontos{margin-top:15px;max-height:150px;overflow-y:auto;border:1px solid #ccc;padding:10px}
+  canvas{border:1px solid #333;margin-top:20px}
+</style>
+</head>
+<body>
+<h2>Pontos para K-Means</h2>
+<label>X:<input id="entradaX" type="number" step="any"/></label>
+<label>Y:<input id="entradaY" type="number" step="any"/></label>
+<button onclick="adicionarPonto()">Adicionar ponto</button>
+<button onclick="executarKMeans()">Executar agrupamento</button>
+<label>Qtd clusters:
+  <select id="entradaK"><option>2</option><option>3</option><option>4</option></select>
+</label>
+<div id="listaPontos"><b>Pontos inseridos:</b><br/></div>
+<canvas id="canvas" width="600" height="400"></canvas>
+
+<script>
+let pontos=[[1,2],[2,3],[3,1.5],[8,8],[9,8.5],[7.5,9],[4,7],[5,8],[6,7.5]];
+atualizarListaPontos();
+function adicionarPonto(){
+  const x=parseFloat(entradaX.value), y=parseFloat(entradaY.value);
+  if(isNaN(x)||isNaN(y)) return alert('Digite valores numéricos válidos');
+  pontos.push([x,y]);
+  atualizarListaPontos();
+  entradaX.value=''; entradaY.value='';
+}
+function atualizarListaPontos(){
+  listaPontos.innerHTML = '<b>Pontos inseridos:</b><br/>' + pontos.map((p,i)=>`#${i+1}: (${p[0]}, ${p[1]})`).join('<br/>');
+}
+function distancia(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+
+function kMeans(pontos,k,maxIter=100){
+  let centroides = [];
+  let usados = new Set();
+  while(centroides.length < k){
+    let idx = Math.floor(Math.random()*pontos.length);
+    if(!usados.has(idx)) {centroides.push(pontos[idx].slice()); usados.add(idx);}
+  }
+  let grupos = new Array(pontos.length).fill(-1);
+  for(let iter=0;iter<maxIter;iter++){
+    let mudancas=0;
+    for(let i=0;i<pontos.length;i++){
+      let minDist=Infinity, melhor=-1;
+      for(let c=0;c<k;c++){
+        let d=distancia(pontos[i],centroides[c]);
+        if(d<minDist){minDist=d;melhor=c;}
+      }
+      if(grupos[i]!==melhor){grupos[i]=melhor;mudancas++;}
+    }
+    if(mudancas===0) break;
+    let somas=Array(k).fill(0).map(_=>[0,0]), contagem=Array(k).fill(0);
+    for(let i=0;i<pontos.length;i++){
+      let c=grupos[i];
+      somas[c][0]+=pontos[i][0]; somas[c][1]+=pontos[i][1]; contagem[c]++;
+    }
+    for(let c=0;c<k;c++){
+      if(contagem[c]){centroides[c][0]=somas[c][0]/contagem[c]; centroides[c][1]=somas[c][1]/contagem[c];}
+    }
+  }
+  return {grupos, centroides};
+}
+function desenharClusters({grupos, centroides}){
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cores=['red','green','blue','orange','purple'];
+  const xs=pontos.map(p=>p[0]), ys=pontos.map(p=>p[1]);
+  let minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+  if(maxX===minX) maxX=minX+1;
+  if(maxY===minY) maxY=minY+1;
+  const escalaX=x=>((x-minX)/(maxX-minX))*(canvas.width-40)+20;
+  const escalaY=y=>canvas.height-(((y-minY)/(maxY-minY))*(canvas.height-40)+20);
+  for(let i=0;i<pontos.length;i++){
+    ctx.fillStyle=cores[grupos[i]%cores.length];
+    ctx.beginPath();
+    ctx.arc(escalaX(pontos[i][0]),escalaY(pontos[i][1]),7,0,2*Math.PI);
+    ctx.fill();
+  }
+  centroides.forEach((c,i)=>{
+    ctx.fillStyle='black';
+    ctx.beginPath();
+    ctx.arc(escalaX(c[0]),escalaY(c[1]),10,0,2*Math.PI);
+    ctx.fill();
+    ctx.fillStyle='white';
+    ctx.font='bold 14px Arial';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(`C${i+1}`, escalaX(c[0]), escalaY(c[1]));
+  });
+}
+
+function executarKMeans(){
+  if(pontos.length<2) return alert('Insira pelo menos 2 pontos');
+  const k=parseInt(entradaK.value);
+  if(k<1||k>pontos.length) return alert('Quantidade de clusters inválida!');
+  desenharClusters(kMeans(pontos,k));
+}
+executarKMeans();
+</script>
+</body>
+</html>
