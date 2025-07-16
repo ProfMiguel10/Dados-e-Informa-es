@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Vendas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 5px; margin: 5px; width: 150px; }
+    canvas { margin-top: 30px; max-width: 600px; }
+  </style>
+</head>
+<body>
+  <h1>Vendas</h1>
+  <input id="produto" placeholder="Produto">
+  <input id="vendas" type="number" placeholder="Qtd">
+  <button onclick="add()">Adicionar</button>
+  <ul id="lista"></ul>
+  <button onclick="graficos()">Gerar Gráficos</button>
+  <h2>Barras</h2><canvas id="barra"></canvas>
+  <h2>Pizza</h2><canvas id="pizza"></canvas>
+  <script>
+    let produtos=[], qtds=[];
+    function add(){
+      let p=document.getElementById('produto').value, q=parseInt(document.getElementById('vendas').value);
+      if(p && !isNaN(q)){
+        produtos.push(p); qtds.push(q);
+        let li=document.createElement('li'); li.textContent=`${p}: ${q} unidades`;
+        document.getElementById('lista').appendChild(li);
+        produto.value=''; vendas.value='';
+      }
+    }
+    function graficos(){
+      let cores=produtos.map(()=>`#${Math.floor(Math.random()*16777215).toString(16)}`);
+      new Chart(barra,{type:'bar',data:{labels:produtos,datasets:[{label:'Vendas',data:qtds,backgroundColor:cores}]}});
+      new Chart(pizza,{type:'pie',data:{labels:produtos,datasets:[{label:'Vendas',data:qtds,backgroundColor:cores}]}});
+    }
+  </script>
+</body>
+</html>
