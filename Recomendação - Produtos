@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Sugestão</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto }
+    input, select, button { margin: 5px 0; padding: 5px; width: 100% }
+    .cliente { border: 1px solid #ccc; padding: 10px; margin-top: 10px }
+  </style>
+</head>
+<body>
+  <h2>Recomendação</h2>
+  <input id="cliente" placeholder="Nome do cliente" />
+  <select id="produto1" onchange="sugerirSegundoProduto()">
+    <option disabled selected>Escolha o primeiro produto</option>
+    <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+  </select>
+  <select id="produto2">
+    <option disabled selected>Escolha ou altere o segundo produto</option>
+    <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+  </select>
+  <button onclick="registrarCliente()">Registrar Cliente</button>
+  <div id="clientes"><b>Clientes registrados:</b></div>
+
+<script>
+const produtos = ['A','B','C','D','E'];
+let clientes = [];
+
+function produtosParaVetor(p1, p2) {
+  return produtos.map(p => (p === p1 || p === p2) ? 1 : 0);
+}
+
+function distancia(a, b) {
+  return Math.sqrt(a.reduce((s, val, i) => s + (val - b[i])**2, 0));
+}
+
+function kMeans(vetores, k = 2, maxIter = 100) {
+  let centroides = [], usados = new Set();
+  while (centroides.length < k) {
+    let i = Math.floor(Math.random() * vetores.length);
+    if (!usados.has(i)) {
+      centroides.push([...vetores[i]]);
+      usados.add(i);
+    }
+  }
+  let grupos = new Array(vetores.length).fill(-1);
+  for (let iter = 0; iter < maxIter; iter++) {
+    let mudou = 0;
+    for (let i = 0; i < vetores.length; i++) {
+      let menor = Infinity, melhor = -1;
+      for (let c = 0; c < k; c++) {
+        let d = distancia(vetores[i], centroides[c]);
+        if (d < menor) { menor = d; melhor = c; }
+      }
+      if (grupos[i] !== melhor) {
+        grupos[i] = melhor;
+        mudou++;
+      }
+    }
+    if (mudou === 0) break;
+    let soma = Array(k).fill(0).map(() => Array(produtos.length).fill(0));
+    let contagem = Array(k).fill(0);
+    for (let i = 0; i < vetores.length; i++) {
+      let g = grupos[i];
+      contagem[g]++;
+      for (let j = 0; j < produtos.length; j++) soma[g][j] += vetores[i][j];
+    }
+    for (let c = 0; c < k; c++) {
+      if (contagem[c]) centroides[c] = soma[c].map(v => v / contagem[c]);
+    }
+  }
+  return grupos;
+}
+
+function registrarCliente() {
+  let nome = cliente.value.trim();
+  let p1 = produto1.value;
+  let p2 = produto2.value;
+  if (!nome || !p1 || !p2 || p1 === p2) return alert("Preencha corretamente.");
+  clientes.push({ nome, produtos: [p1, p2] });
+  atualizarClientes();
+  cliente.value = "";
+  produto1.selectedIndex = 0;
+  produto2.selectedIndex = 0;
+}
+
+function atualizarClientes() {
+  let cEl = document.getElementById("clientes");
+  cEl.innerHTML = "<b>Clientes registrados:</b><br>";
+  clientes.forEach(c => {
+    cEl.innerHTML += `<div class="cliente"><b>${c.nome}</b>: comprou ${c.produtos.join(" e ")}</div>`;
+  });
+}
+
+function sugerirSegundoProduto() {
+  let p1 = produto1.value;
+  if (!p1) return;
+  let vetores = clientes.map(c => produtosParaVetor(c.produtos[0], c.produtos[1]));
+  if (vetores.length < 2) {
+    let restantes = produtos.filter(p => p !== p1);
+    produto2.value = restantes[Math.floor(Math.random() * restantes.length)];
+    return;
+  }
+  let grupos = kMeans(vetores, 2);
+  let freq = {};
+  clientes.forEach((c, i) => {
+    if (c.produtos.includes(p1)) {
+      c.produtos.forEach(p => {
+        if (p !== p1) freq[p] = (freq[p] || 0) + 1;
+      });
+    }
+  });
+  let sugerido = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+  if (sugerido) {
+    produto2.value = sugerido[0];
+  } else {
+    let restantes = produtos.filter(p => p !== p1);
+    produto2.value = restantes[Math.floor(Math.random() * restantes.length)];
+  }
+}
+</script>
+</body>
+</html>
